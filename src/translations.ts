@@ -4,8 +4,8 @@ export const translations = {
     monthText: (formatted: string) => `Det är ${formatted}.`,
     remainingDays: (n: number, includesToday: boolean) =>
       includesToday
-        ? `There are ${n} working days left this month including today.`
-        : `There are ${n} working days left this month.`,
+        ? `Det är ${n} arbetsdagar kvar den här månaden inklusive idag.`
+        : `Det är ${n} arbetsdagar kvar den här månaden.`,
     percentage: (p: number) =>
       `Om du vill sprida ut dina tokens jämnt över månaden bör du ha ungefär ${p}% kvar.`,
     error: "Misslyckades att hämta helgdagar",
