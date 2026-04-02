@@ -1,29 +1,29 @@
 import { useEffect, useState } from "react";
 import { z } from "zod";
 
+const RawHolidaySchema = z.object({
+  dagar: z.array(
+    z.object({
+      datum: z.string(),
+      "arbetsfri dag": z.string(),
+    }),
+  ),
+});
+
+const HolidaySchema = RawHolidaySchema.transform((data) => ({
+  dagar: data.dagar.map((d) => ({
+    datum: d.datum,
+    arbetsfriDag: d["arbetsfri dag"].trim() === "Ja",
+  })),
+}));
+
+type HolidayResponse = z.infer<typeof HolidaySchema>;
+
 function App() {
   const now = new Date();
 
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
-
-  const RawHolidaySchema = z.object({
-    dagar: z.array(
-      z.object({
-        datum: z.string(),
-        "arbetsfri dag": z.string(),
-      }),
-    ),
-  });
-
-  const HolidaySchema = RawHolidaySchema.transform((data) => ({
-    dagar: data.dagar.map((d) => ({
-      datum: d.datum,
-      arbetsfriDag: d["arbetsfri dag"].trim() === "Ja",
-    })),
-  }));
-
-  type HolidayResponse = z.infer<typeof HolidaySchema>;
 
   const [data, setData] = useState<HolidayResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
