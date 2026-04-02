@@ -13,6 +13,7 @@ export function useLang() {
   useEffect(() => {
     localStorage.setItem("lang", lang);
     document.documentElement.lang = lang;
+    document.title = lang === "sv" ? "Kommer mina tokens räcka?" : "Will my tokens last?";
   }, [lang]);
 
   return { lang, setLang };
