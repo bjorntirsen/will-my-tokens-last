@@ -11,6 +11,8 @@
     "prepare": "vp config"
   },
   "dependencies": {
+    "@sentry/react": "^10.47.0",
+    "@sentry/vite-plugin": "^5.1.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "zod": "^4.3.6"
