@@ -9,4 +9,5 @@ export default defineConfig({
   fmt: {},
   lint: { options: { typeAware: true, typeCheck: true } },
   plugins: [react()],
+  base: "/will-my-tokens-last/",
 });
