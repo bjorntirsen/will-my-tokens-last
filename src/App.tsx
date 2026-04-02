@@ -14,7 +14,7 @@ function App() {
 
   const dagar = data?.dagar ?? [];
 
-  const { calendarDays, today, remainingWorkingDays, remainingPercentage } =
+  const { calendarDays, today, remainingWorkingDays, remainingPercentage, includesToday } =
     calculateWorkingDays(dagar);
 
   const now = new Date();
@@ -47,7 +47,7 @@ function App() {
 
       <h1>{t.title}</h1>
       <p>{t.monthText(formatted)}</p>
-      <p>{t.remainingDays(remainingWorkingDays)}</p>
+      <p>{t.remainingDays(remainingWorkingDays, includesToday)}</p>
       <p>{t.percentage(remainingPercentage)}</p>
 
       {error && <p style={{ color: "red" }}>{t.error}</p>}
