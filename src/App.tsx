@@ -19,14 +19,53 @@ const HolidaySchema = RawHolidaySchema.transform((data) => ({
 
 type HolidayResponse = z.infer<typeof HolidaySchema>;
 
+type Lang = "sv" | "en";
+
+const translations = {
+  sv: {
+    title: "Kommer mina tokens räcka?",
+    monthText: (formatted: string) => `Det är ${formatted}.`,
+    remainingDays: (n: number) => `Det är ${n} arbetsdagar kvar på månaden inklusive idag.`,
+    percentage: (p: number) =>
+      `Om du vill sprida ut dina tokens jämnt över månaden bör du ha ungefär ${p}% kvar.`,
+    error: "Misslyckades att hämta helgdagar",
+    weekdays: ["Mån", "Tis", "Ons", "Tor", "Fre", "Lör", "Sön"],
+  },
+  en: {
+    title: "Will my tokens last?",
+    monthText: (formatted: string) => `It is ${formatted}.`,
+    remainingDays: (n: number) => `There are ${n} working days left this month including today.`,
+    percentage: (p: number) =>
+      `If you want to spread your tokens evenly, you should have about ${p}% remaining.`,
+    error: "Failed to fetch holidays",
+    weekdays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+  },
+};
+
 function App() {
+  const [data, setData] = useState<HolidayResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [lang, setLang] = useState<Lang>(() => {
+    const saved = localStorage.getItem("lang") as Lang | null;
+    if (saved) return saved;
+
+    const browserLang = navigator.language.toLowerCase();
+    if (browserLang.startsWith("sv")) return "sv";
+
+    return "en";
+  });
+  useEffect(() => {
+    localStorage.setItem("lang", lang);
+  }, [lang]);
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+  const t = translations[lang];
+
   const now = new Date();
 
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
-
-  const [data, setData] = useState<HolidayResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   function getDayOfWeek(dateString: string) {
     const day = new Date(dateString).getDay(); // 0 = Sun, 1 = Mon ...
@@ -65,9 +104,9 @@ function App() {
     }
 
     void fetchHolidays();
-  }, [year, month, HolidaySchema]);
+  }, [year, month]);
 
-  const formatter = new Intl.DateTimeFormat("sv-SE", {
+  const formatter = new Intl.DateTimeFormat(lang === "sv" ? "sv-SE" : "en-US", {
     month: "long",
     year: "numeric",
   });
@@ -93,15 +132,28 @@ function App() {
 
   return (
     <main>
-      <h1>Will my tokens last?</h1>
-      <p>Det är {formatted}.</p>
-      <p>Det är {remainingWorkingDays} arbetsdagar kvar på månaden inklusive idag.</p>
-      <p>
-        Om du vill sprida ut dina tokens jämnt över månaden bör du ha ungefär {remainingPercentage}%
-        kvar.
-      </p>
+      <div style={{ display: "inline-flex", border: "1px solid #ccc", borderRadius: 6 }}>
+        {(["sv", "en"] as const).map((l) => (
+          <button
+            key={l}
+            onClick={() => setLang(l)}
+            style={{
+              padding: "4px 8px",
+              background: lang === l ? "#ddd" : "transparent",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            {l === "sv" ? "Svenska" : "English"}
+          </button>
+        ))}
+      </div>
+      <h1>{t.title}</h1>
+      <p>{t.monthText(formatted)}</p>
+      <p>{t.remainingDays(remainingWorkingDays)}</p>
+      <p>{t.percentage(remainingPercentage)}</p>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p style={{ color: "red" }}>{t.error}</p>}
 
       <div
         style={{
@@ -112,7 +164,7 @@ function App() {
         }}
       >
         {/* Weekday headers */}
-        {["Mån", "Tis", "Ons", "Tor", "Fre", "Lör", "Sön"].map((d) => (
+        {t.weekdays.map((d) => (
           <div key={d} style={{ fontWeight: "bold", textAlign: "center" }}>
             {d}
           </div>
