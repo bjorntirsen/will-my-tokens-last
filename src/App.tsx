@@ -1,25 +1,7 @@
-import { useEffect, useState } from "react";
-import { z } from "zod";
-
-const RawHolidaySchema = z.object({
-  dagar: z.array(
-    z.object({
-      datum: z.string(),
-      "arbetsfri dag": z.string(),
-    }),
-  ),
-});
-
-const HolidaySchema = RawHolidaySchema.transform((data) => ({
-  dagar: data.dagar.map((d) => ({
-    datum: d.datum,
-    arbetsfriDag: d["arbetsfri dag"].trim() === "Ja",
-  })),
-}));
-
-type HolidayResponse = z.infer<typeof HolidaySchema>;
-
-type Lang = "sv" | "en";
+import { useLang } from "./useLang";
+import { useTheme } from "./useTheme";
+import { useHolidays } from "./useHolidays";
+import { Calendar } from "./calendar";
 
 const translations = {
   sv: {
@@ -30,52 +12,49 @@ const translations = {
       `Om du vill sprida ut dina tokens jämnt över månaden bör du ha ungefär ${p}% kvar.`,
     error: "Misslyckades att hämta helgdagar",
     weekdays: ["Mån", "Tis", "Ons", "Tor", "Fre", "Lör", "Sön"],
+    theme: {
+      light: "☀️ Ljust",
+      dark: "🌙 Mörkt",
+      system: "🖥️ System",
+    },
   },
   en: {
     title: "Will my tokens last?",
     monthText: (formatted: string) => `It is ${formatted}.`,
     remainingDays: (n: number) => `There are ${n} working days left this month including today.`,
     percentage: (p: number) =>
-      `If you want to spread your tokens evenly, you should have about ${p}% remaining.`,
+      `If you want to spread your tokens evenly, you should have about ${p}% left.`,
     error: "Failed to fetch holidays",
     weekdays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    theme: {
+      light: "☀️ Light",
+      dark: "🌙 Dark",
+      system: "🖥️ System",
+    },
   },
 };
 
+function getDayOfWeek(dateString: string) {
+  const day = new Date(dateString).getDay();
+  return day === 0 ? 7 : day;
+}
+
+function isWeekend(dateString: string) {
+  const day = new Date(dateString).getDay();
+  return day === 0 || day === 6;
+}
+
 function App() {
-  const [data, setData] = useState<HolidayResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [lang, setLang] = useState<Lang>(() => {
-    const saved = localStorage.getItem("lang") as Lang | null;
-    if (saved) return saved;
+  const { lang, setLang } = useLang();
+  const { theme, setTheme } = useTheme();
 
-    const browserLang = navigator.language.toLowerCase();
-    if (browserLang.startsWith("sv")) return "sv";
-
-    return "en";
-  });
-  useEffect(() => {
-    localStorage.setItem("lang", lang);
-  }, [lang]);
-  useEffect(() => {
-    document.documentElement.lang = lang;
-  }, [lang]);
   const t = translations[lang];
 
   const now = new Date();
-
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
 
-  function getDayOfWeek(dateString: string) {
-    const day = new Date(dateString).getDay(); // 0 = Sun, 1 = Mon ...
-    return day === 0 ? 7 : day; // convert to 1 = Mon ... 7 = Sun
-  }
-
-  function isWeekend(dateString: string) {
-    const day = new Date(dateString).getDay();
-    return day === 0 || day === 6;
-  }
+  const { data, error } = useHolidays(year, month);
 
   const calendarDays =
     data?.dagar.map((d) => {
@@ -88,23 +67,6 @@ function App() {
         isWorkingDay: !d.arbetsfriDag && !weekend,
       };
     }) ?? [];
-
-  useEffect(() => {
-    async function fetchHolidays() {
-      try {
-        const res = await fetch(`https://sholiday.faboul.se/dagar/v2.1/${year}/${month}`);
-        const json = await res.json();
-        console.log(json.dagar[0].röd_dag);
-        const parsed = HolidaySchema.parse(json);
-        setData(parsed);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to fetch holidays");
-      }
-    }
-
-    void fetchHolidays();
-  }, [year, month]);
 
   const formatter = new Intl.DateTimeFormat(lang === "sv" ? "sv-SE" : "en-US", {
     month: "long",
@@ -132,19 +94,21 @@ function App() {
 
   return (
     <main>
-      <div style={{ display: "inline-flex", border: "1px solid #ccc", borderRadius: 6 }}>
+      <div className="segmented">
         {(["sv", "en"] as const).map((l) => (
-          <button
-            key={l}
-            onClick={() => setLang(l)}
-            style={{
-              padding: "4px 8px",
-              background: lang === l ? "#ddd" : "transparent",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
+          <button key={l} onClick={() => setLang(l)} className={lang === l ? "active" : ""}>
             {l === "sv" ? "Svenska" : "English"}
+          </button>
+        ))}
+      </div>
+      <div className="segmented">
+        {(["light", "dark", "system"] as const).map((tMode) => (
+          <button
+            key={tMode}
+            onClick={() => setTheme(tMode)}
+            className={theme === tMode ? "active" : ""}
+          >
+            {t.theme[tMode]}
           </button>
         ))}
       </div>
@@ -155,51 +119,7 @@ function App() {
 
       {error && <p style={{ color: "red" }}>{t.error}</p>}
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(7, 1fr)",
-          gap: "4px",
-          marginTop: "16px",
-        }}
-      >
-        {/* Weekday headers */}
-        {t.weekdays.map((d) => (
-          <div key={d} style={{ fontWeight: "bold", textAlign: "center" }}>
-            {d}
-          </div>
-        ))}
-
-        {/* Empty cells before first day */}
-        {calendarDays.length > 0 &&
-          Array.from({ length: calendarDays[0].dayOfWeek - 1 }).map((_, i) => (
-            <div key={`empty-${i}`} />
-          ))}
-
-        {/* Days */}
-        {calendarDays.map((day) => (
-          <div
-            key={day.datum}
-            style={{
-              padding: "8px",
-              textAlign: "center",
-              border:
-                day.datum === today
-                  ? "2px solid var(--calendar-today-border)"
-                  : "1px solid var(--calendar-cell-border)",
-              borderRadius: "4px",
-              background: day.arbetsfriDag
-                ? "var(--calendar-holiday-bg)"
-                : day.isWeekend
-                  ? "var(--calendar-weekend-bg)"
-                  : "var(--calendar-working-bg)",
-              color: "var(--calendar-text)",
-            }}
-          >
-            {new Date(day.datum).getDate()}
-          </div>
-        ))}
-      </div>
+      <Calendar days={calendarDays} today={today} weekdays={t.weekdays} />
     </main>
   );
 }
