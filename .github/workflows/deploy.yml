@@ -20,12 +20,6 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6.3.0
-        with:
-          node-version: 24
-          cache: pnpm
-
       - name: Get pnpm version from package.json
         id: pnpmv
         run: echo "version=$(jq -r '.packageManager' package.json | cut -d'@' -f2)" >> $GITHUB_OUTPUT
@@ -35,6 +29,12 @@ jobs:
         with:
           version: ${{ steps.pnpmv.outputs.version }}
           run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6.3.0
+        with:
+          node-version: 24
+          cache: pnpm
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
