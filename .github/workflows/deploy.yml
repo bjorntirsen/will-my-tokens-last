@@ -2,34 +2,42 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [master] # or main
+    branches: [master]
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v6.3.0
         with:
-          node-version: 20
+          node-version: 24
           cache: pnpm
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 10
+      - name: Get pnpm version from package.json
+        id: pnpmv
+        run: echo "version=$(jq -r '.packageManager' package.json | cut -d'@' -f2)" >> $GITHUB_OUTPUT
 
-      - name: Install
-        run: pnpm install
+      - name: Install pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+        with:
+          version: ${{ steps.pnpmv.outputs.version }}
+          run_install: false
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm build
@@ -44,5 +52,5 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy
+      - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
