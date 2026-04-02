@@ -17,11 +17,15 @@ const HolidaySchema = RawHolidaySchema.transform((data) => ({
   })),
 }));
 
-type HolidayResponse = z.infer<typeof HolidaySchema>;
+export type HolidayResponse = z.infer<typeof HolidaySchema>;
 
-export function useHolidays(year: number, month: string) {
+export function useHolidays() {
   const [data, setData] = useState<HolidayResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
 
   useEffect(() => {
     async function fetchHolidays() {
