@@ -9,7 +9,7 @@ export const translations = {
     percentage: (p: number) =>
       `Om du vill sprida ut dina tokens jämnt över månaden bör du ha ungefär ${p}% kvar.`,
     error: "Misslyckades att hämta helgdagar",
-    weekdays: ["Mån", "Tis", "Ons", "Tor", "Fre", "Lör", "Sön"],
+    weekdays: ["mån", "tis", "ons", "tor", "fre", "lör", "sön"],
     theme: {
       light: "☀️ Ljust",
       dark: "🌙 Mörkt",
