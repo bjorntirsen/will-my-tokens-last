@@ -2,42 +2,55 @@ import { useState, useEffect } from "react";
 
 type Theme = "light" | "dark" | "system";
 
+const COLOR_SCHEME_QUERY = "(prefers-color-scheme: dark)";
+
+const isBrowser = typeof window !== "undefined";
+
 function getSystemTheme(): Exclude<Theme, "system"> {
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  if (!isBrowser) return "light";
+  return window.matchMedia(COLOR_SCHEME_QUERY).matches ? "dark" : "light";
+}
+
+function resolveTheme(theme: Theme): "light" | "dark" {
+  return theme === "system" ? getSystemTheme() : theme;
+}
+
+function isTheme(value: unknown): value is Theme {
+  return value === "light" || value === "dark" || value === "system";
 }
 
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem("theme") as Theme | null;
-    if (saved === "light" || saved === "dark" || saved === "system") {
-      return saved;
-    }
+    if (!isBrowser) return "light";
+
+    const saved = localStorage.getItem("theme");
+    if (isTheme(saved)) return saved;
 
     return "system";
   });
 
   useEffect(() => {
+    if (!isBrowser) return;
+
     localStorage.setItem("theme", theme);
-
-    if (theme === "system") {
-      document.documentElement.dataset.theme = getSystemTheme();
-      return;
-    }
-
-    document.documentElement.dataset.theme = theme;
+    document.documentElement.dataset.theme = resolveTheme(theme);
   }, [theme]);
 
   useEffect(() => {
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    if (!isBrowser) return;
 
-    const listener = () => {
+    const media = window.matchMedia(COLOR_SCHEME_QUERY);
+
+    const update = () => {
       if (theme === "system") {
-        document.documentElement.dataset.theme = media.matches ? "dark" : "light";
+        document.documentElement.dataset.theme = getSystemTheme();
       }
     };
 
-    media.addEventListener("change", listener);
-    return () => media.removeEventListener("change", listener);
+    update();
+
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
   }, [theme]);
 
   return { theme, setTheme };
