@@ -31,7 +31,11 @@ function buildCalendarDays(dagar: HolidayResponse["dagar"] | undefined) {
   );
 }
 
-export function calculateMonthStats(holidaysData: HolidaysData | null, lang: "sv" | "en") {
+export function calculateMonthStats(
+  holidaysData: HolidaysData | null,
+  lang: "sv" | "en",
+  customDaysOff: Record<string, "off" | "half"> = {},
+) {
   const calendarDays = buildCalendarDays(holidaysData?.current.dagar);
   const nextMonthCalendarDays = buildCalendarDays(holidaysData?.next.dagar);
 
@@ -39,10 +43,19 @@ export function calculateMonthStats(holidaysData: HolidaysData | null, lang: "sv
   const today = now.toISOString().slice(0, 10);
   const currentMonthLabel = formatMonthYear(now, lang);
   const nextMonthLabel = formatMonthYear(new Date(now.getFullYear(), now.getMonth() + 1, 1), lang);
-  const totalWorkingDays = calendarDays.filter((d) => !d.arbetsfriDag && !d.isWeekend).length;
-  const remainingWorkingDays = calendarDays.filter(
-    (d) => d.datum >= today && !d.arbetsfriDag && !d.isWeekend,
-  ).length;
+
+  const customTotalAdj = calendarDays
+    .filter((d) => d.isWorkingDay && customDaysOff[d.datum])
+    .reduce((s, d) => s + (customDaysOff[d.datum] === "off" ? 1 : 0.5), 0);
+
+  const customRemainingAdj = calendarDays
+    .filter((d) => d.datum >= today && d.isWorkingDay && customDaysOff[d.datum])
+    .reduce((s, d) => s + (customDaysOff[d.datum] === "off" ? 1 : 0.5), 0);
+
+  const totalWorkingDays = calendarDays.filter((d) => d.isWorkingDay).length - customTotalAdj;
+  const remainingWorkingDays =
+    calendarDays.filter((d) => d.datum >= today && d.isWorkingDay).length - customRemainingAdj;
+
   const remainingPercentage =
     totalWorkingDays === 0
       ? 0
@@ -57,12 +70,15 @@ export function calculateMonthStats(holidaysData: HolidaysData | null, lang: "sv
         );
 
   const includesToday = calendarDays.some(
-    (d) => d.datum === today && !d.arbetsfriDag && !d.isWeekend,
+    (d) => d.datum === today && d.isWorkingDay && customDaysOff[d.datum] !== "off",
   );
 
-  const nextMonthWorkingDays = nextMonthCalendarDays.filter(
-    (d) => !d.arbetsfriDag && !d.isWeekend,
-  ).length;
+  const nextCustomAdj = nextMonthCalendarDays
+    .filter((d) => d.isWorkingDay && customDaysOff[d.datum])
+    .reduce((s, d) => s + (customDaysOff[d.datum] === "off" ? 1 : 0.5), 0);
+
+  const nextMonthWorkingDays =
+    nextMonthCalendarDays.filter((d) => d.isWorkingDay).length - nextCustomAdj;
 
   return {
     calendarDays,
