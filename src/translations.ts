@@ -24,6 +24,8 @@ export const translations = {
         ? `Nästa månad, ${formatted}, har 1 arbetsdag.`
         : `Nästa månad, ${formatted}, har ${n} arbetsdagar.`,
     error: "Misslyckades att hämta helgdagar",
+    tip: "💡 Tips: Klicka på arbetsdagar för att markera dem som lediga eller halvdagar.",
+    removeAllDaysOff: "Ta bort alla lediga dagar",
     weekdays: ["mån", "tis", "ons", "tor", "fre", "lör", "sön"],
     theme: {
       light: "☀️ Ljust",
@@ -56,6 +58,8 @@ export const translations = {
         ? `Next month, ${formatted}, has 1 working day.`
         : `Next month, ${formatted}, has ${n} working days.`,
     error: "Failed to fetch holidays",
+    tip: "💡 Tip: Click on working days to mark them as a day off or half day off.",
+    removeAllDaysOff: "Remove all days off",
     weekdays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     theme: {
       light: "☀️ Light",

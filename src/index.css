@@ -31,6 +31,7 @@
   --calendar-working-bg: #e6f7ec;
   --calendar-weekend-bg: #fff4e5;
   --calendar-holiday-bg: #ffe5e5;
+  --calendar-custom-off-bg: #fde8b0;
 
   --calendar-text: var(--text-h);
   --calendar-muted: var(--text);
@@ -70,6 +71,7 @@ main {
   --calendar-working-bg: #1f3d2b;
   --calendar-weekend-bg: #3a2f1f;
   --calendar-holiday-bg: #3d1f1f;
+  --calendar-custom-off-bg: #3d3015;
 
   --calendar-cell-border: var(--border);
   --calendar-today-border: var(--accent);
@@ -91,6 +93,7 @@ main {
     --calendar-working-bg: #1f3d2b;
     --calendar-weekend-bg: #3a2f1f;
     --calendar-holiday-bg: #3d1f1f;
+    --calendar-custom-off-bg: #3d3015;
 
     --calendar-cell-border: var(--border);
     --calendar-today-border: var(--accent);
