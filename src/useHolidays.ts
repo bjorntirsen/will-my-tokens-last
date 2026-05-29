@@ -19,9 +19,13 @@ const HolidaySchema = RawHolidaySchema.transform((data) => ({
 
 export type HolidayResponse = z.infer<typeof HolidaySchema>;
 
+export type HolidaysData = {
+  current: HolidayResponse;
+  next: HolidayResponse;
+};
+
 export function useHolidays() {
-  const [data, setData] = useState<HolidayResponse | null>(null);
-  const [nextData, setNextData] = useState<HolidayResponse | null>(null);
+  const [holidaysData, setHolidaysData] = useState<HolidaysData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const now = new Date();
@@ -39,8 +43,10 @@ export function useHolidays() {
           fetch(`https://sholiday.faboul.se/dagar/v2.1/${nextMonthYear}/${nextMonth}`),
         ]);
         const [json, nextJson] = await Promise.all([res.json(), nextRes.json()]);
-        setData(HolidaySchema.parse(json));
-        setNextData(HolidaySchema.parse(nextJson));
+        setHolidaysData({
+          current: HolidaySchema.parse(json),
+          next: HolidaySchema.parse(nextJson),
+        });
       } catch (err) {
         console.error(err);
         setError("Failed to fetch holidays");
@@ -50,5 +56,5 @@ export function useHolidays() {
     void fetchAll();
   }, [year, month, nextMonthYear, nextMonth]);
 
-  return { data, nextData, error };
+  return { holidaysData, error };
 }

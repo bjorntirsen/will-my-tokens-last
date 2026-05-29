@@ -8,7 +8,7 @@ type CalendarDay = {
 
 type Props = {
   days: CalendarDay[];
-  today: string;
+  today?: string;
   weekdays: string[];
 };
 
