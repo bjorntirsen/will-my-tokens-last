@@ -2,12 +2,21 @@ export const translations = {
   sv: {
     title: "Kommer mina tokens räcka?",
     monthText: (formatted: string) => `Det är ${formatted}.`,
-    remainingDays: (n: number, includesToday: boolean) =>
+    remainingDays: (n: number, includesToday: boolean) => {
+      if (n === 0)
+        return "Det finns inga arbetsdagar kvar den här månaden. Hoppas du använde dina tokens väl.";
+      if (n === 1)
+        return includesToday
+          ? "Det är 1 arbetsdag kvar den här månaden, inklusive idag."
+          : "Det är 1 arbetsdag kvar den här månaden.";
+      return includesToday
+        ? `Det är ${n} arbetsdagar kvar den här månaden, inklusive idag.`
+        : `Det är ${n} arbetsdagar kvar den här månaden.`;
+    },
+    percentage: (startP: number, endP: number, includesToday: boolean) =>
       includesToday
-        ? `Det är ${n} arbetsdagar kvar den här månaden inklusive idag.`
-        : `Det är ${n} arbetsdagar kvar den här månaden.`,
-    percentage: (p: number) =>
-      `Om du vill sprida ut dina tokens jämnt över månaden bör du ha ungefär ${p}% kvar.`,
+        ? `Om du vill hålla jämn takt bör du ha ungefär ${startP}% i början av dagen och ${endP}% när arbetsdagen är slut.`
+        : `Om du vill hålla jämn takt bör du ha ungefär ${startP}% i början av nästa arbetsdag och ${endP}% i slutet av den.`,
     error: "Misslyckades att hämta helgdagar",
     weekdays: ["mån", "tis", "ons", "tor", "fre", "lör", "sön"],
     theme: {
@@ -18,13 +27,22 @@ export const translations = {
   },
   en: {
     title: "Will my tokens last?",
-    monthText: (formatted: string) => `It is ${formatted}.`,
-    remainingDays: (n: number, includesToday: boolean) =>
+    monthText: (formatted: string) => `It's ${formatted}.`,
+    remainingDays: (n: number, includesToday: boolean) => {
+      if (n === 0)
+        return "There are no workdays left this month. I hope you put those tokens to good use.";
+      if (n === 1)
+        return includesToday
+          ? "There is 1 working day left this month, including today."
+          : "There is 1 working day left this month.";
+      return includesToday
+        ? `There are ${n} working days left this month, including today.`
+        : `There are ${n} working days left this month.`;
+    },
+    percentage: (startP: number, endP: number, includesToday: boolean) =>
       includesToday
-        ? `There are ${n} working days left this month including today.`
-        : `There are ${n} working days left this month.`,
-    percentage: (p: number) =>
-      `If you want to spread your tokens evenly, you should have about ${p}% left.`,
+        ? `If you want to stay on pace, you should have about ${startP}% at the start of the day and ${endP}% by the end of it.`
+        : `If you want to stay on pace, you should have about ${startP}% at the start of the next workday and ${endP}% at the end of it.`,
     error: "Failed to fetch holidays",
     weekdays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     theme: {
