@@ -1,34 +1,31 @@
+import { useState } from "react";
 import { useLang } from "./useLang";
 import { useTheme } from "./useTheme";
 import { useHolidays } from "./useHolidays";
 import { Calendar } from "./calendar";
 import { translations } from "./translations";
-import { calculateWorkingDays } from "./calculateWorkingDays";
+import { calculateMonthStats } from "./calculateMonthStats";
 
 function App() {
   const { lang, setLang } = useLang();
   const { theme, setTheme } = useTheme();
-  const { data, error } = useHolidays();
+  const { holidaysData, error } = useHolidays();
+  const [showNextMonth, setShowNextMonth] = useState(false);
 
   const t = translations[lang];
-
-  const dagar = data?.dagar ?? [];
 
   const {
     calendarDays,
     today,
+    currentMonthLabel,
+    nextMonthLabel,
     remainingWorkingDays,
     remainingPercentage,
     endOfDayPercentage,
     includesToday,
-  } = calculateWorkingDays(dagar);
-
-  const now = new Date();
-
-  const formatted = new Intl.DateTimeFormat(lang === "sv" ? "sv-SE" : "en-US", {
-    month: "long",
-    year: "numeric",
-  }).format(now);
+    nextMonthCalendarDays,
+    nextMonthWorkingDays,
+  } = calculateMonthStats(holidaysData, lang);
 
   return (
     <main>
@@ -52,13 +49,27 @@ function App() {
       </div>
 
       <h1>{t.title}</h1>
-      <p>{t.monthText(formatted)}</p>
+      <p>{t.monthText(currentMonthLabel)}</p>
       <p>{t.remainingDays(remainingWorkingDays, includesToday)}</p>
       <p>{t.percentage(remainingPercentage, endOfDayPercentage, includesToday)}</p>
 
       {error && <p style={{ color: "red" }}>{t.error}</p>}
 
       <Calendar days={calendarDays} today={today} weekdays={t.weekdays} />
+
+      <button
+        className={`next-month-toggle ${showNextMonth ? "active" : ""}`}
+        onClick={() => setShowNextMonth(!showNextMonth)}
+      >
+        {showNextMonth ? t.hideNextMonth : t.viewNextMonth}
+      </button>
+
+      {showNextMonth && (
+        <>
+          <p>{t.nextMonthText(nextMonthWorkingDays, nextMonthLabel)}</p>
+          <Calendar days={nextMonthCalendarDays} weekdays={t.weekdays} />
+        </>
+      )}
     </main>
   );
 }

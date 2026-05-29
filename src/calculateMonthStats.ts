@@ -1,4 +1,11 @@
-import type { HolidayResponse } from "./useHolidays";
+import type { HolidaysData, HolidayResponse } from "./useHolidays";
+
+function formatMonthYear(date: Date, lang: "sv" | "en") {
+  return new Intl.DateTimeFormat(lang === "sv" ? "sv-SE" : "en-US", {
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
 
 function getDayOfWeek(dateString: string) {
   const day = new Date(dateString).getDay();
@@ -10,8 +17,8 @@ function isWeekend(dateString: string) {
   return day === 0 || day === 6;
 }
 
-export function calculateWorkingDays(dagar: HolidayResponse["dagar"] | undefined) {
-  const calendarDays =
+function buildCalendarDays(dagar: HolidayResponse["dagar"] | undefined) {
+  return (
     dagar?.map((d) => {
       const weekend = isWeekend(d.datum);
       return {
@@ -20,9 +27,18 @@ export function calculateWorkingDays(dagar: HolidayResponse["dagar"] | undefined
         isWeekend: weekend,
         isWorkingDay: !d.arbetsfriDag && !weekend,
       };
-    }) ?? [];
+    }) ?? []
+  );
+}
 
-  const today = new Date().toISOString().slice(0, 10);
+export function calculateMonthStats(holidaysData: HolidaysData | null, lang: "sv" | "en") {
+  const calendarDays = buildCalendarDays(holidaysData?.current.dagar);
+  const nextMonthCalendarDays = buildCalendarDays(holidaysData?.next.dagar);
+
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const currentMonthLabel = formatMonthYear(now, lang);
+  const nextMonthLabel = formatMonthYear(new Date(now.getFullYear(), now.getMonth() + 1, 1), lang);
   const totalWorkingDays = calendarDays.filter((d) => !d.arbetsfriDag && !d.isWeekend).length;
   const remainingWorkingDays = calendarDays.filter(
     (d) => d.datum >= today && !d.arbetsfriDag && !d.isWeekend,
@@ -44,12 +60,20 @@ export function calculateWorkingDays(dagar: HolidayResponse["dagar"] | undefined
     (d) => d.datum === today && !d.arbetsfriDag && !d.isWeekend,
   );
 
+  const nextMonthWorkingDays = nextMonthCalendarDays.filter(
+    (d) => !d.arbetsfriDag && !d.isWeekend,
+  ).length;
+
   return {
     calendarDays,
     today,
+    currentMonthLabel,
+    nextMonthLabel,
     remainingWorkingDays,
     remainingPercentage,
     endOfDayPercentage,
     includesToday,
+    nextMonthCalendarDays,
+    nextMonthWorkingDays,
   };
 }

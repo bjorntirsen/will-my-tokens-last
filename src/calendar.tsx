@@ -8,7 +8,7 @@ type CalendarDay = {
 
 type Props = {
   days: CalendarDay[];
-  today: string;
+  today?: string;
   weekdays: string[];
 };
 
@@ -20,6 +20,7 @@ export function Calendar({ days, today, weekdays }: Props) {
         gridTemplateColumns: "repeat(7, 1fr)",
         gap: "4px",
         marginTop: "16px",
+        marginBottom: "16px",
       }}
     >
       {weekdays.map((d) => (
