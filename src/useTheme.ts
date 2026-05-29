@@ -2,36 +2,42 @@ import { useState, useEffect } from "react";
 
 type Theme = "light" | "dark" | "system";
 
+function getSystemTheme(): Exclude<Theme, "system"> {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem("theme") as Theme | null;
-    if (saved) return saved;
+    const saved = localStorage.getItem("theme");
 
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    if (saved === "light" || saved === "dark" || saved === "system") {
+      return saved;
+    }
+
+    return "system";
   });
 
   useEffect(() => {
-    if (theme === "system") {
-      document.documentElement.removeAttribute("data-theme");
-      localStorage.removeItem("theme");
-    } else {
-      document.documentElement.dataset.theme = theme;
-      localStorage.setItem("theme", theme);
-    }
+    localStorage.setItem("theme", theme);
+
+    document.documentElement.dataset.theme = theme === "system" ? getSystemTheme() : theme;
   }, [theme]);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)");
 
-    const listener = () => {
-      if (!localStorage.getItem("theme")) {
-        setTheme(media.matches ? "dark" : "light");
+    const updateTheme = () => {
+      if (theme === "system") {
+        document.documentElement.dataset.theme = getSystemTheme();
       }
     };
 
-    media.addEventListener("change", listener);
-    return () => media.removeEventListener("change", listener);
-  }, []);
+    media.addEventListener("change", updateTheme);
+
+    return () => {
+      media.removeEventListener("change", updateTheme);
+    };
+  }, [theme]);
 
   return { theme, setTheme };
 }
