@@ -21,27 +21,34 @@ export type HolidayResponse = z.infer<typeof HolidaySchema>;
 
 export function useHolidays() {
   const [data, setData] = useState<HolidayResponse | null>(null);
+  const [nextData, setNextData] = useState<HolidayResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
+  const nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const nextMonthYear = nextMonthDate.getFullYear();
+  const nextMonth = String(nextMonthDate.getMonth() + 1).padStart(2, "0");
 
   useEffect(() => {
-    async function fetchHolidays() {
+    async function fetchAll() {
       try {
-        const res = await fetch(`https://sholiday.faboul.se/dagar/v2.1/${year}/${month}`);
-        const json = await res.json();
-        const parsed = HolidaySchema.parse(json);
-        setData(parsed);
+        const [res, nextRes] = await Promise.all([
+          fetch(`https://sholiday.faboul.se/dagar/v2.1/${year}/${month}`),
+          fetch(`https://sholiday.faboul.se/dagar/v2.1/${nextMonthYear}/${nextMonth}`),
+        ]);
+        const [json, nextJson] = await Promise.all([res.json(), nextRes.json()]);
+        setData(HolidaySchema.parse(json));
+        setNextData(HolidaySchema.parse(nextJson));
       } catch (err) {
         console.error(err);
         setError("Failed to fetch holidays");
       }
     }
 
-    void fetchHolidays();
-  }, [year, month]);
+    void fetchAll();
+  }, [year, month, nextMonthYear, nextMonth]);
 
-  return { data, error };
+  return { data, nextData, error };
 }

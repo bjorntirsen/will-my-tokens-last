@@ -173,3 +173,21 @@ p {
   background: var(--accent-bg);
   color: var(--text-h);
 }
+
+.next-month-toggle {
+  border-radius: 6px;
+  margin: 6px 0;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  background: var(--accent-bg);
+  color: var(--text-h);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.next-month-toggle.active {
+  background: none;
+  color: var(--text);
+  border: 1px solid var(--border);
+}

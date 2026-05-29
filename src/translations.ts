@@ -17,6 +17,11 @@ export const translations = {
       includesToday
         ? `Om du vill hålla jämn takt bör du ha ungefär ${startP}% i början av dagen och ${endP}% när arbetsdagen är slut.`
         : `Om du vill hålla jämn takt bör du ha ungefär ${startP}% i början av nästa arbetsdag och ${endP}% i slutet av den.`,
+    viewNextMonth: "Visa nästa månad",
+    nextMonthText: (formatted: string) => formatted,
+    hideNextMonth: "Dölj nästa månad",
+    nextMonthDays: (n: number) =>
+      n === 1 ? "Nästa månad har 1 arbetsdag." : `Nästa månad har ${n} arbetsdagar.`,
     error: "Misslyckades att hämta helgdagar",
     weekdays: ["mån", "tis", "ons", "tor", "fre", "lör", "sön"],
     theme: {
@@ -43,6 +48,11 @@ export const translations = {
       includesToday
         ? `If you want to stay on pace, you should have about ${startP}% at the start of the day and ${endP}% by the end of it.`
         : `If you want to stay on pace, you should have about ${startP}% at the start of the next workday and ${endP}% at the end of it.`,
+    viewNextMonth: "View next month",
+    nextMonthText: (formatted: string) => formatted,
+    hideNextMonth: "Hide next month",
+    nextMonthDays: (n: number) =>
+      n === 1 ? "Next month has 1 working day." : `Next month has ${n} working days.`,
     error: "Failed to fetch holidays",
     weekdays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     theme: {
