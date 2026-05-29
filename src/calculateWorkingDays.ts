@@ -32,9 +32,24 @@ export function calculateWorkingDays(dagar: HolidayResponse["dagar"] | undefined
       ? 0
       : Math.min(100, Math.max(0, Math.round((remainingWorkingDays / totalWorkingDays) * 100)));
 
+  const endOfDayPercentage =
+    totalWorkingDays === 0
+      ? 0
+      : Math.min(
+          100,
+          Math.max(0, Math.round(((remainingWorkingDays - 1) / totalWorkingDays) * 100)),
+        );
+
   const includesToday = calendarDays.some(
     (d) => d.datum === today && !d.arbetsfriDag && !d.isWeekend,
   );
 
-  return { calendarDays, today, remainingWorkingDays, remainingPercentage, includesToday };
+  return {
+    calendarDays,
+    today,
+    remainingWorkingDays,
+    remainingPercentage,
+    endOfDayPercentage,
+    includesToday,
+  };
 }
