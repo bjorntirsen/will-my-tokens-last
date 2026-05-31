@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { trackEvent } from "./track";
 
 type Lang = "sv" | "en";
 
@@ -10,10 +11,22 @@ export function useLang() {
     return navigator.language.toLowerCase().startsWith("sv") ? "sv" : "en";
   });
 
+  const initialTracked = useRef(false);
+  const previousLang = useRef<Lang | null>(null);
+
   useEffect(() => {
     localStorage.setItem("lang", lang);
 
     document.documentElement.lang = lang;
+
+    if (!initialTracked.current) {
+      trackEvent(`initial-lang-${lang}`);
+      initialTracked.current = true;
+    } else if (previousLang.current !== lang) {
+      trackEvent(`switch-lang-${lang}`);
+    }
+
+    previousLang.current = lang;
 
     document.title = lang === "sv" ? "Kommer mina tokens räcka?" : "Will my tokens last?";
 
@@ -22,11 +35,7 @@ export function useLang() {
         ? "Kommer dina tokens räcka… eller blir du tvungen att koda för hand? Se hur många arbetsdagar som är kvar och få kontroll över din användning."
         : "Will your tokens last… or will you be forced to code by hand? Check how many working days are left and get your usage under control.";
 
-    const meta = document.querySelector('meta[name="description"]');
-
-    if (meta) {
-      meta.setAttribute("content", description);
-    }
+    document.querySelector('meta[name="description"]')?.setAttribute("content", description);
   }, [lang]);
 
   return { lang, setLang };
