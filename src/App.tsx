@@ -6,6 +6,7 @@ import { useCustomDaysOff } from "./useCustomDaysOff";
 import { Calendar } from "./calendar";
 import { translations } from "./translations";
 import { calculateMonthStats } from "./calculateMonthStats";
+import { trackEvent } from "./track";
 
 function App() {
   const { lang, setLang } = useLang();
@@ -76,7 +77,10 @@ function App() {
 
       <button
         className={`next-month-toggle ${showNextMonth ? "active" : ""}`}
-        onClick={() => setShowNextMonth(!showNextMonth)}
+        onClick={() => {
+          if (!showNextMonth) trackEvent("view-next-month", "Viewed next month");
+          setShowNextMonth(!showNextMonth);
+        }}
       >
         {showNextMonth ? t.hideNextMonth : t.viewNextMonth}
       </button>

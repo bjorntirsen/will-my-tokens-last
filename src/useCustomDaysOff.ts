@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { trackEvent } from "./track";
 
 type DayStatus = "off" | "half";
 
@@ -64,6 +65,8 @@ export function useCustomDaysOff(): {
     setDaysOff((prev) => {
       const current = prev[date];
       const next: DayStatus | undefined = !current ? "off" : current === "off" ? "half" : undefined;
+
+      if (next) trackEvent("mark-day-off", "Day marked off/half");
 
       const updated = { ...prev };
       if (next) {

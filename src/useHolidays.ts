@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { useState, useEffect } from "react";
+import { trackEvent } from "./track";
 
 const RawHolidaySchema = z.object({
   dagar: z.array(
@@ -50,6 +51,7 @@ export function useHolidays() {
       } catch (err) {
         console.error(err);
         setError("Failed to fetch holidays");
+        trackEvent("holidays-fetch-error", "Holidays API fetch failed");
       }
     }
 
