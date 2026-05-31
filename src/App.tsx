@@ -78,7 +78,7 @@ function App() {
       <button
         className={`next-month-toggle ${showNextMonth ? "active" : ""}`}
         onClick={() => {
-          if (!showNextMonth) trackEvent("view-next-month", "Viewed next month");
+          if (!showNextMonth) trackEvent("view-next-month");
           setShowNextMonth(!showNextMonth);
         }}
       >

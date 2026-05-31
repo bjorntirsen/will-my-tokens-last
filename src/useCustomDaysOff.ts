@@ -66,7 +66,7 @@ export function useCustomDaysOff(): {
       const current = prev[date];
       const next: DayStatus | undefined = !current ? "off" : current === "off" ? "half" : undefined;
 
-      if (next) trackEvent("mark-day-off", "Day marked off/half");
+      if (next) trackEvent("mark-day-off");
 
       const updated = { ...prev };
       if (next) {

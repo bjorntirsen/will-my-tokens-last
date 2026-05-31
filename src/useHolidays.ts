@@ -51,7 +51,7 @@ export function useHolidays() {
       } catch (err) {
         console.error(err);
         setError("Failed to fetch holidays");
-        trackEvent("holidays-fetch-error", "Holidays API fetch failed");
+        trackEvent("holidays-fetch-error");
       }
     }
 
