@@ -25,6 +25,28 @@ export type HolidaysData = {
   next: HolidayResponse;
 };
 
+const CACHE_TTL_MS = 62 * 24 * 60 * 60 * 1000;
+
+function getCached(key: string): HolidayResponse | null {
+  try {
+    const stored = localStorage.getItem(key);
+    if (!stored) return null;
+    const { raw, cachedAt } = JSON.parse(stored) as { raw: unknown; cachedAt: number };
+    if (Date.now() - cachedAt > CACHE_TTL_MS) return null;
+    return HolidaySchema.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function setCached(key: string, raw: unknown) {
+  try {
+    localStorage.setItem(key, JSON.stringify({ raw, cachedAt: Date.now() }));
+  } catch {
+    // Ignore cache write failures.
+  }
+}
+
 export function useHolidays() {
   const [holidaysData, setHolidaysData] = useState<HolidaysData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,17 +59,24 @@ export function useHolidays() {
   const nextMonth = String(nextMonthDate.getMonth() + 1).padStart(2, "0");
 
   useEffect(() => {
+    async function fetchOne(y: number, m: string): Promise<HolidayResponse> {
+      const cacheKey = `holidays-${y}-${m}`;
+      const cached = getCached(cacheKey);
+      if (cached) return cached;
+      const res = await fetch(`https://sholiday.faboul.se/dagar/v2.1/${y}/${m}`);
+      const raw = (await res.json()) as unknown;
+      const parsed = HolidaySchema.parse(raw);
+      setCached(cacheKey, raw);
+      return parsed;
+    }
+
     async function fetchAll() {
       try {
-        const [res, nextRes] = await Promise.all([
-          fetch(`https://sholiday.faboul.se/dagar/v2.1/${year}/${month}`),
-          fetch(`https://sholiday.faboul.se/dagar/v2.1/${nextMonthYear}/${nextMonth}`),
+        const [current, next] = await Promise.all([
+          fetchOne(year, month),
+          fetchOne(nextMonthYear, nextMonth),
         ]);
-        const [json, nextJson] = await Promise.all([res.json(), nextRes.json()]);
-        setHolidaysData({
-          current: HolidaySchema.parse(json),
-          next: HolidaySchema.parse(nextJson),
-        });
+        setHolidaysData({ current, next });
       } catch (err) {
         console.error(err);
         setError("Failed to fetch holidays");
