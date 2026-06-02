@@ -41,6 +41,9 @@
 
   --calendar-today-border: var(--accent);
 
+  --skeleton-base: #e8e7ec;
+  --skeleton-shine: #f5f4f8;
+
   transition:
     background-color 200ms,
     color 200ms;
@@ -75,6 +78,9 @@ main {
 
   --calendar-cell-border: var(--border);
   --calendar-today-border: var(--accent);
+
+  --skeleton-base: #22242e;
+  --skeleton-shine: #2e3040;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -97,6 +103,9 @@ main {
 
     --calendar-cell-border: var(--border);
     --calendar-today-border: var(--accent);
+
+    --skeleton-base: #22242e;
+    --skeleton-shine: #2e3040;
   }
 }
 
@@ -193,4 +202,25 @@ p {
   background: none;
   color: var(--text);
   border: 1px solid var(--border);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-block {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base) 25%,
+    var(--skeleton-shine) 50%,
+    var(--skeleton-base) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 4px;
 }

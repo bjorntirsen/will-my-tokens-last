@@ -1,4 +1,4 @@
-import type { HolidaysData, HolidayResponse } from "./useHolidays";
+import type { HolidayResponse } from "./useHolidays";
 
 function formatMonthYear(date: Date, lang: "sv" | "en") {
   return new Intl.DateTimeFormat(lang === "sv" ? "sv-SE" : "en-US", {
@@ -32,12 +32,13 @@ function buildCalendarDays(dagar: HolidayResponse["dagar"] | undefined) {
 }
 
 export function calculateMonthStats(
-  holidaysData: HolidaysData | null,
+  current: HolidayResponse | null,
+  next: HolidayResponse | null,
   lang: "sv" | "en",
   customDaysOff: Record<string, "off" | "half"> = {},
 ) {
-  const calendarDays = buildCalendarDays(holidaysData?.current.dagar);
-  const nextMonthCalendarDays = buildCalendarDays(holidaysData?.next.dagar);
+  const calendarDays = buildCalendarDays(current?.dagar);
+  const nextMonthCalendarDays = buildCalendarDays(next?.dagar);
 
   const now = new Date();
   const today = now.toISOString().slice(0, 10);
