@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLang } from "./useLang";
 import { useTheme } from "./useTheme";
+import { usePercentageMode } from "./usePercentageMode";
 import { useHolidays } from "./useHolidays";
 import { useCustomDaysOff } from "./useCustomDaysOff";
 import { Calendar } from "./calendar";
@@ -11,6 +12,7 @@ import { trackEvent } from "./track";
 function App() {
   const { lang, setLang } = useLang();
   const { theme, setTheme } = useTheme();
+  const { mode: percentageMode, setMode: setPercentageMode } = usePercentageMode();
   const { holidaysData, error } = useHolidays();
   const [showNextMonth, setShowNextMonth] = useState(false);
 
@@ -51,11 +53,26 @@ function App() {
           </button>
         ))}
       </div>
+      <div className="segmented">
+        {(["left", "used"] as const).map((m) => (
+          <button
+            key={m}
+            onClick={() => setPercentageMode(m)}
+            className={percentageMode === m ? "active" : ""}
+          >
+            {t.percentageMode[m]}
+          </button>
+        ))}
+      </div>
 
       <h1>{t.title}</h1>
       <p>{t.monthText(currentMonthLabel)}</p>
       <p>{t.remainingDays(remainingWorkingDays, includesToday)}</p>
-      <p>{t.percentage(remainingPercentage, endOfDayPercentage, includesToday)}</p>
+      <p>
+        {percentageMode === "used"
+          ? t.percentageUsed(100 - remainingPercentage, 100 - endOfDayPercentage, includesToday)
+          : t.percentage(remainingPercentage, endOfDayPercentage, includesToday)}
+      </p>
 
       {error && <p style={{ color: "red" }}>{t.error}</p>}
 
