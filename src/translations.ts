@@ -40,6 +40,7 @@ export const translations = {
       left: "% kvar",
       used: "% använt",
     },
+    viewSourceCode: "Visa källkod",
   },
   en: {
     title: "Will my tokens last?",
@@ -82,5 +83,6 @@ export const translations = {
       left: "% left",
       used: "% used",
     },
+    viewSourceCode: "View source code",
   },
 };

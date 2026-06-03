@@ -154,16 +154,38 @@ p {
   margin: 0;
 }
 
-.segmented + .segmented {
+.segmented,
+.github-link {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-top: 6px;
+}
+
+.segmented + .segmented,
+.segmented + .github-link {
   margin-left: 6px;
 }
 
 .segmented {
-  display: inline-flex;
-  border: 1px solid var(--border);
-  border-radius: 6px;
   overflow: hidden;
-  margin-top: 6px;
+}
+
+.github-link {
+  align-items: center;
+  justify-content: center;
+  padding: 4px 6px;
+  color: var(--text);
+  text-decoration: none;
+  vertical-align: top;
+  transition:
+    color 200ms,
+    border-color 200ms;
+}
+
+.github-link:hover {
+  color: var(--text-h);
+  border-color: var(--accent-border);
 }
 
 .segmented button {
