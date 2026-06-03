@@ -20,15 +20,11 @@ const HolidaySchema = RawHolidaySchema.transform((data) => ({
 
 export type HolidayResponse = z.infer<typeof HolidaySchema>;
 
-const CACHE_TTL_MS = 62 * 24 * 60 * 60 * 1000;
-
 function getCached(key: string): HolidayResponse | null {
   try {
     const stored = localStorage.getItem(key);
     if (!stored) return null;
-    const { raw, cachedAt } = JSON.parse(stored) as { raw: unknown; cachedAt: number };
-    if (Date.now() - cachedAt > CACHE_TTL_MS) return null;
-    return HolidaySchema.parse(raw);
+    return HolidaySchema.parse(JSON.parse(stored) as unknown);
   } catch {
     return null;
   }
@@ -36,9 +32,21 @@ function getCached(key: string): HolidayResponse | null {
 
 function setCached(key: string, raw: unknown) {
   try {
-    localStorage.setItem(key, JSON.stringify({ raw, cachedAt: Date.now() }));
+    localStorage.setItem(key, JSON.stringify(raw));
   } catch {
     // Ignore cache write failures.
+  }
+}
+
+function pruneCache(keepKeys: Set<string>) {
+  try {
+    for (const key of Object.keys(localStorage)) {
+      if (key.startsWith("holidays-") && !keepKeys.has(key)) {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch {
+    // Ignore localStorage errors.
   }
 }
 
@@ -67,6 +75,8 @@ export function useHolidays() {
   const nextMonth = String(nextMonthDate.getMonth() + 1).padStart(2, "0");
 
   useEffect(() => {
+    pruneCache(new Set([`holidays-${year}-${month}`, `holidays-${nextMonthYear}-${nextMonth}`]));
+
     fetchOne(year, month)
       .then(setCurrent)
       .catch(() => {
