@@ -14,3 +14,6 @@ peerDependencyRules:
   allowedVersions:
     vite: "*"
     vitest: "*"
+
+# Match Renovate's 3-day release-age policy, including transitive dependencies.
+minimumReleaseAge: 4320
