@@ -1,62 +1,14 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "workarounds:typesNodeVersioning"
-  ],
-  "schedule": [
-    "* * * * 1"
-  ],
-  "automerge": true,
-  "automergeType": "pr",
-  "minimumReleaseAge": "3 days",
-  "prHourlyLimit": 2,
-  "labels": [
-    "dependencies"
-  ],
+  "extends": ["github>bjorntirsen/renovate-config", "workarounds:typesNodeVersioning"],
   "lockFileMaintenance": {
-    "enabled": false
+    "enabled": true,
+    "automerge": true
   },
   "packageRules": [
     {
-      "matchDatasources": [
-        "npm"
-      ],
-      "minimumReleaseAge": "3 days"
-    },
-    {
-      "matchUpdateTypes": [
-        "patch",
-        "pin",
-        "minor"
-      ],
-      "matchCurrentVersion": "!/^0/",
-      "groupName": "non-breaking updates"
-    },
-    {
-      "matchManagers": [
-        "github-actions"
-      ],
-      "groupName": "GitHub Actions updates"
-    },
-    {
-      "matchManagers": [
-        "github-actions"
-      ],
-      "matchPackageNames": [
-        "actions/setup-node"
-      ],
-      "versioning": "loose"
-    },
-    {
-      "matchManagers": [
-        "npm"
-      ],
-      "matchPackageNames": [
-        "@types/node"
-      ],
-      "versioning": "node",
+      "matchPackageNames": ["@types/node"],
       "allowedVersions": "<25"
     }
-  ],
-  "minimumReleaseAgePackageManagerSync": true
+  ]
 }
